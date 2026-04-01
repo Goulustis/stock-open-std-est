@@ -42,7 +42,7 @@ from utils import (
 class PipelineConfig(BaseConfig):
     """Pipeline configuration with all model sub-configs."""
 
-    _target: Type = field(default=None, repr=False)
+    _target: Optional[Type] = field(default=None, repr=False)
 
     naive_config: NaiveConfig = field(default_factory=NaiveConfig)
     rolling_config: RollingMeanConfig = field(default_factory=RollingMeanConfig)
@@ -94,20 +94,14 @@ class Pipeline:
         print_section("Building Features")
         feature_df, target = build_feature_matrix(df, self.config)
         print_data_summary(feature_df, "Feature Matrix")
-        print_info(
-            f"Target: {len(target)} values, mean={target.mean():.4f}, std={target.std():.4f}"
-        )
+        print_info(f"Target: {len(target)} values, mean={target.mean():.4f}, std={target.std():.4f}")
 
         print_section("Train/Test Split")
         self.X_train, self.X_test, self.y_train, self.y_test = self._time_split(
             feature_df, target, self.config.train_end_date
         )
-        print_info(
-            f"Train: {len(self.X_train)} samples ({self.X_train.index.min()} to {self.X_train.index.max()})"
-        )
-        print_info(
-            f"Test:  {len(self.X_test)} samples ({self.X_test.index.min()} to {self.X_test.index.max()})"
-        )
+        print_info(f"Train: {len(self.X_train)} samples ({self.X_train.index.min()} to {self.X_train.index.max()})")
+        print_info(f"Test:  {len(self.X_test)} samples ({self.X_test.index.min()} to {self.X_test.index.max()})")
 
         self.feature_names = list(self.X_train.columns)
 
@@ -144,9 +138,7 @@ class Pipeline:
             uses_feat = pred.uses_features()
             print_info(f"  {name}: {pred.get_name()} (uses features: {uses_feat})")
 
-    def _time_split(
-        self, feature_df: pd.DataFrame, target: pd.Series, train_end_date: str
-    ) -> tuple:
+    def _time_split(self, feature_df: pd.DataFrame, target: pd.Series, train_end_date: str) -> tuple:
         """Split data by date. All rows <= train_end_date go to train."""
         train_dates = feature_df.index <= pd.to_datetime(train_end_date).date()
         test_dates = ~train_dates
@@ -225,13 +217,9 @@ class Pipeline:
 
         # Use Adaptive Lasso for feature selection (oracle property)
         lasso_pred = self.predictors["lasso"]
-        selected_features = getattr(
-            lasso_pred, "selected_features_", self.feature_names
-        )
+        selected_features = getattr(lasso_pred, "selected_features_", self.feature_names)
 
-        print_section(
-            f"Lasso Feature Selection: {len(selected_features)}/{len(self.feature_names)} features selected"
-        )
+        print_section(f"Lasso Feature Selection: {len(selected_features)}/{len(self.feature_names)} features selected")
         for i, feat in enumerate(selected_features, 1):
             print_info(f"  {i}. {feat}")
 
@@ -251,9 +239,7 @@ class Pipeline:
             selected_predictors[name] = pred
 
         if skipped:
-            print_warning(
-                f"Skipped in selected-features pass (required features not selected): {skipped}"
-            )
+            print_warning(f"Skipped in selected-features pass (required features not selected): {skipped}")
 
         selected_results = self._train_predict(
             selected_predictors,

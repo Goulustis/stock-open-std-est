@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Type
+from typing import Type, Optional
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
@@ -12,7 +12,7 @@ from models.base import BasePredictor
 class RandomForestConfig(BaseModelConfig):
     """Config for Random Forest regression model."""
 
-    _target: Type = field(default_factory=lambda: RandomForestPredictor)
+    _target: Optional[Type] = field(default_factory=lambda: RandomForestPredictor)
 
     n_estimators: int = 200
     """Number of trees."""

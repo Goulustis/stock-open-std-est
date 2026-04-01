@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Type
+from typing import Type, Optional
 import numpy as np
 import pandas as pd
 
@@ -11,7 +11,7 @@ from models.base import BasePredictor
 class Garch11Config(BaseModelConfig):
     """Config for GARCH(1,1) volatility prediction model."""
 
-    _target: Type = field(default_factory=lambda: Garch11Predictor)
+    _target: Optional[Type] = field(default_factory=lambda: Garch11Predictor)
 
 
 class Garch11Predictor(BasePredictor):
@@ -58,7 +58,7 @@ class Garch11Predictor(BasePredictor):
 class EgarchConfig(BaseModelConfig):
     """Config for EGARCH volatility prediction model."""
 
-    _target: Type = field(default_factory=lambda: EgarchPredictor)
+    _target: Optional[Type] = field(default_factory=lambda: EgarchPredictor)
 
 
 class EgarchPredictor(BasePredictor):

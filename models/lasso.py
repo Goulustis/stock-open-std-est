@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Type, List
+from typing import Type, List, Optional
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LassoCV, Lasso
@@ -13,7 +13,7 @@ from models.base import BasePredictor
 class LassoConfig(BaseModelConfig):
     """Config for Lasso (L1-regularized) regression model."""
 
-    _target: Type = field(default_factory=lambda: LassoPredictor)
+    _target: Optional[Type] = field(default_factory=lambda: LassoPredictor)
 
     n_alphas: int = 100
     """Number of alpha values to try in CV."""
@@ -81,7 +81,7 @@ class AdaptiveLassoConfig(BaseModelConfig):
     This gives the oracle property — consistent variable selection.
     """
 
-    _target: Type = field(default_factory=lambda: AdaptiveLassoPredictor)
+    _target: Optional[Type] = field(default_factory=lambda: AdaptiveLassoPredictor)
 
     n_alphas: int = 100
     """Number of alpha values to try in CV."""

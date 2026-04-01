@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Type
+from typing import Type, Optional
 import numpy as np
 import pandas as pd
 
@@ -11,7 +11,7 @@ from models.base import BasePredictor
 class NaiveConfig(BaseModelConfig):
     """Config for NaivePrevDay baseline — predicts yesterday's RV."""
 
-    _target: Type = field(default_factory=lambda: NaivePrevDay)
+    _target: Optional[Type] = field(default_factory=lambda: NaivePrevDay)
 
 
 class NaivePrevDay(BasePredictor):

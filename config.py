@@ -14,25 +14,23 @@ class PrintableConfig:
     """Base config class with rich-formatted string representation."""
 
     def __str__(self):
-        table = Table(title=self.__class__.__name__, show_header=False, box=None)
-        table.add_column("Key", style="cyan", no_wrap=True)
-        table.add_column("Value", style="green")
+        lines = [f"[bold]{self.__class__.__name__}:[/bold]"]
         for key, val in vars(self).items():
             if key.startswith("_"):
                 continue
             if isinstance(val, Tuple):
                 val = ", ".join(str(v) for v in val)
-            table.add_row(key, str(val))
-        with console.capture() as capture:
-            console.print(table)
-        return capture.get()
+            elif isinstance(val, PrintableConfig):
+                val = val.__class__.__name__
+            lines.append(f"  [cyan]{key}:[/cyan] [green]{val}[/green]")
+        return "\n".join(lines)
 
 
 @dataclass
 class BaseModelConfig(PrintableConfig):
     """Base config for all prediction models."""
 
-    _target: Type = None
+    _target: Optional[Type] = field(default=None, repr=False)
 
     def setup(self, **kwargs) -> Any:
         """Instantiate the predictor class from config."""
@@ -46,7 +44,7 @@ class BaseModelConfig(PrintableConfig):
 class BaseConfig(PrintableConfig):
     """Top-level configuration for the std_pred pipeline."""
 
-    _target: Type = field(default=None, repr=False)
+    _target: Optional[Type] = field(default=None, repr=False)
 
     # Data paths
     csv_path: str = "NVDA_5m.csv"
@@ -82,12 +80,8 @@ class BaseConfig(PrintableConfig):
     def validate(self) -> None:
         """Validate configuration consistency."""
         assert Path(self.csv_path).exists(), f"CSV file not found: {self.csv_path}"
-        assert self.premarket_start < self.target_start, (
-            "Premarket must end before target starts"
-        )
-        assert self.target_start < self.target_end, (
-            "Target start must be before target end"
-        )
+        assert self.premarket_start < self.target_start, "Premarket must end before target starts"
+        assert self.target_start < self.target_end, "Target start must be before target end"
 
 
 def load_config_from_yaml(filename: str, base_config: BaseConfig = None) -> dict:

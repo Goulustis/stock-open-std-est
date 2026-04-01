@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Type
+from typing import Type, Optional
 import numpy as np
 import pandas as pd
 
@@ -11,7 +11,7 @@ from models.base import BasePredictor
 class EwmaConfig(BaseModelConfig):
     """Config for EWMA volatility prediction model."""
 
-    _target: Type = field(default_factory=lambda: EwmaPredictor)
+    _target: Optional[Type] = field(default_factory=lambda: EwmaPredictor)
 
     lambda_param: float = 0.94
     """Decay factor for EWMA (typically 0.94 for daily data)."""

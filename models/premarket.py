@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
-from typing import Type
+from typing import Type, Optional
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import LinearRegression
 
 from config import BaseModelConfig
 from models.base import BasePredictor
@@ -11,7 +12,7 @@ from models.base import BasePredictor
 class PremarketConfig(BaseModelConfig):
     """Config for PremarketRV baseline — predicts from same-day premarket vol."""
 
-    _target: Type = field(default_factory=lambda: PremarketRV)
+    _target: Optional[Type] = field(default_factory=lambda: PremarketRV)
 
     pm_feature_col: str = "pm_rv"
     """Column name for premarket RV in the feature matrix."""
@@ -28,36 +29,22 @@ class PremarketRV(BasePredictor):
         super().__init__(config)
         self.config: PremarketConfig = config
         self.pm_feature_col = config.pm_feature_col
-        self.intercept = 0.0
-        self.slope = 1.0
+        self.model = None
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> None:
         """Fit a simple linear regression: target = slope * pm_rv + intercept."""
         if self.pm_feature_col not in X.columns:
             raise ValueError(f"Feature '{self.pm_feature_col}' not found in X")
 
-        pm_rv = X[self.pm_feature_col].values
-        mask = ~np.isnan(pm_rv) & ~np.isnan(y.values)
+        pm_rv = X[[self.pm_feature_col]].values
+        mask = ~np.isnan(pm_rv).flatten() & ~np.isnan(y.values)
 
         if mask.sum() < 10:
-            self.slope = 1.0
-            self.intercept = y.mean()
+            self.model = LinearRegression()
+            self.model.fit(pm_rv, y.values)
         else:
-            x = pm_rv[mask]
-            yt = y.values[mask]
-
-            x_mean = x.mean()
-            y_mean = yt.mean()
-
-            numerator = np.sum((x - x_mean) * (yt - y_mean))
-            denominator = np.sum((x - x_mean) ** 2)
-
-            if denominator > 0:
-                self.slope = numerator / denominator
-                self.intercept = y_mean - self.slope * x_mean
-            else:
-                self.slope = 1.0
-                self.intercept = 0.0
+            self.model = LinearRegression()
+            self.model.fit(pm_rv[mask], y.values[mask])
 
         self.is_fitted = True
 
@@ -65,10 +52,7 @@ class PremarketRV(BasePredictor):
         if not self.is_fitted:
             raise RuntimeError("Model not fitted")
 
-        pm_rv = X[self.pm_feature_col].values
-        predictions = self.slope * pm_rv + self.intercept
-
-        return predictions
+        return self.model.predict(X[[self.pm_feature_col]].values)
 
     def uses_features(self) -> bool:
         return True

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Type
+from typing import Type, Optional
 import numpy as np
 import pandas as pd
 
@@ -11,7 +11,7 @@ from models.base import BasePredictor
 class RollingMeanConfig(BaseModelConfig):
     """Config for RollingMean baseline."""
 
-    _target: Type = field(default_factory=lambda: RollingMean)
+    _target: Optional[Type] = field(default_factory=lambda: RollingMean)
 
     window: int = 10
     """Number of trailing days for rolling mean."""

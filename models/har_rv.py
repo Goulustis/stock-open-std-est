@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Type, List
+from typing import Type, List, Optional
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -12,7 +12,7 @@ from models.base import BasePredictor
 class HarRvConfig(BaseModelConfig):
     """Config for HAR-RV-X (Heterogeneous Autoregressive Realized Volatility with eXogenous features)."""
 
-    _target: Type = field(default_factory=lambda: HarRvPredictor)
+    _target: Optional[Type] = field(default_factory=lambda: HarRvPredictor)
 
     exogenous_features: List[str] = field(
         default_factory=lambda: ["pm_rv", "overnight_gap_abs"]

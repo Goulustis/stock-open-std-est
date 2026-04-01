@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Type
+from typing import Type, Optional
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import RidgeCV
@@ -12,7 +12,7 @@ from models.base import BasePredictor
 class RidgeConfig(BaseModelConfig):
     """Config for Ridge (L2-regularized) regression model."""
 
-    _target: Type = field(default_factory=lambda: RidgePredictor)
+    _target: Optional[Type] = field(default_factory=lambda: RidgePredictor)
 
     alphas: tuple = field(default_factory=lambda: (0.001, 0.01, 0.1, 1.0, 10.0, 100.0))
     """Alpha values to try in CV."""

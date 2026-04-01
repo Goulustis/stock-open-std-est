@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Type
+from typing import Type, Optional
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -12,7 +12,7 @@ from models.base import BasePredictor
 class XGBoostConfig(BaseModelConfig):
     """Config for XGBoost regression model."""
 
-    _target: Type = field(default_factory=lambda: XGBoostPredictor)
+    _target: Optional[Type] = field(default_factory=lambda: XGBoostPredictor)
 
     n_estimators: int = 200
     learning_rate: float = 0.05
